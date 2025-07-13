@@ -20,13 +20,16 @@ drawBat = False
 isBallOut = True
 totalBallHits = 0
 isBatShort = False
+infiniteLives = False
+firstScreenCleared = False
+showDebug = False
 
 # statystyki
 points = 0
 ballsLeft = 5
 
 # ---CZCIONKI---
-atari = pygame.font.Font("atari.otf", 60) # czcionka atari
+atari = pygame.font.Font("atari.otf", 100) # czcionka atari
 freesansbold = pygame.font.Font("freesansbold.ttf", 30) # czcionka freesansbold
 
 # ---DZWIEKI---
@@ -36,8 +39,9 @@ wallLeftImg = pygame.image.load("wallLeft.png").convert()
 wallRightImg = pygame.image.load("wallRight.png").convert()
 wallTop = pygame.Rect(310, 130, 1300, 60)
 bat = pygame.Rect(885, 1053, 150, 20)
-ball = pygame.Rect(951, 560, 20, 20)
+ball = pygame.Rect(951, 650, 20, 20)
 batShort = pygame.Rect(922, 1053, 80, 20)
+ballOutCheck = pygame.Rect(310, 1075, 1300, 30)
 
 # ---BALL---
 ballSpeed = 5
@@ -45,9 +49,9 @@ speedMode = "bat"
 canBreakBricks = False
 
 # ---CEGLY---
-brickWidth = 50
+brickWidth = 65
 brickHeight = 25
-columns = 26
+columns = 20
 
 redBrickPosX = 310
 redBrickPosY = 290
@@ -168,9 +172,11 @@ def startGame():
     drawBat = True
 
 def throwBall():
-    global isBallOut, posX, ballAngleRad, ballVelX, ballVelY
+    global isBallOut, posX, ballAngleRad, ballVelX, ballVelY, ballSpeed, speedMode
     
     isBallOut = False
+    speedMode = "bat"
+    ballSpeed = 5
 
     whichPosX = random.randint(0,2) # losowanie startowej pozycji X ball
 
@@ -190,6 +196,8 @@ def throwBall():
     
     elif whichAngle == 1:
         ballAngle = 315
+
+    ball = pygame.Rect(posX, 650, 20, 20)
     
     ballAngleRad = math.radians(ballAngle)
 
@@ -227,6 +235,16 @@ while running:
         if event.type == pygame.MOUSEBUTTONDOWN:
             if gameStarted == True and isBallOut == True: # wyrzucenie pilki
                 throwBall()
+        
+        if pressedKeys[pygame.K_i] and isBallOut == True:
+            infiniteLives = True
+        
+        if pressedKeys[pygame.K_d]:
+            if showDebug == False:
+                showDebug = True
+
+            elif showDebug == True:
+                showDebug = False
 
     # ---RYSOWANIE EKRANU---
     screen.fill("black")
@@ -235,6 +253,7 @@ while running:
     wallLeft = screen.blit(wallLeftImg, [250, 130])
     wallRight = screen.blit(wallRightImg, [1610, 130])
     pygame.draw.rect(screen, [142, 142, 142], wallTop)
+    pygame.draw.rect(screen, "black", ballOutCheck)
 
     # rysowanie paletki
     if drawBat == True and isBatShort == False:
@@ -283,34 +302,139 @@ while running:
     if ball.colliderect(wallTop):
         ballVelY *= -1
         isBatShort = True
+        canBreakBricks = True
+
+    # pilka wypada
+    if ball.colliderect(ballOutCheck):
+        isBallOut = True
+        isBatShort = False
+        totalBallHits = 0
+
+        if infiniteLives == False:
+            ballsLeft -= 1
+
+        ball = pygame.Rect(951, 650, 20, 20)
+
+        if ballsLeft == 0:
+            gameStarted = False
+            gameEnded = True
+        
 
     # odbijanie od cegiel
     if canBreakBricks == True:
-        for idx, blueBrick in enumerate(blueBricks):
+        for idx, blueBrick in enumerate(blueBricks): # niebieska
             if ball.colliderect(blueBrick):
                 ballVelY *= -1
                 points += 1
                 canBreakBricks = False
                 del blueBricks[idx]
         
-        for idx, greenBrick in enumerate(greenBricks):
+        for idx, greenBrick in enumerate(greenBricks): # zielona
             if ball.colliderect(greenBrick):
                 ballVelY *= -1
                 points += 1
                 canBreakBricks = False
                 del greenBricks[idx]
 
-        for idx, yellowBrick in enumerate(yellowBricks):
+        for idx, yellowBrick in enumerate(yellowBricks): # zolta
             if ball.colliderect(yellowBrick):
                 ballVelY *= -1
                 points += 4
                 canBreakBricks = False
                 del yellowBricks[idx]
+            
+        for idx, dorangeBrick in enumerate(dorangeBricks): # ciemnopomaranczowa
+            if ball.colliderect(dorangeBrick):
+                if speedMode == "bat":
+                    ballSpeed = 8
+                    if ballVelX > 0 and ballVelY < 0:
+                        ballAngle = 315
+                    
+                    elif ballVelX < 0 and ballVelY < 0:
+                        ballAngle = 225
+                    
+                    elif ballVelX > 0 and ballVelY > 0:
+                        ballAngle = 45
+                    
+                    elif ballVelX < 0 and ballVelY > 0:
+                        ballAngle = 135
+                    
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+                
+                else:
+                    ballVelY *= -1
+
+                points += 4
+                canBreakBricks = False
+                del dorangeBricks[idx]
+                speedMode = "brick"
+        
+        for idx, orangeBrick in enumerate(orangeBricks): # pomaranczowa
+            if ball.colliderect(orangeBrick):
+                if speedMode == "bat":
+                    ballSpeed = 8
+                    if ballVelX > 0 and ballVelY < 0:
+                        ballAngle = 315
+                    
+                    elif ballVelX < 0 and ballVelY < 0:
+                        ballAngle = 225
+                    
+                    elif ballVelX > 0 and ballVelY > 0:
+                        ballAngle = 45
+                    
+                    elif ballVelX < 0 and ballVelY > 0:
+                        ballAngle = 135
+                    
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+                
+                else:
+                    ballVelY *= -1
+
+                points += 7
+                canBreakBricks = False
+                del orangeBricks[idx]
+                speedMode = "brick"
+        
+        for idx, redBrick in enumerate(redBricks): # czerwona
+            if ball.colliderect(redBrick):
+                if speedMode == "bat":
+                    ballSpeed = 8
+                    if ballVelX > 0 and ballVelY < 0:
+                        ballAngle = 315
+                    
+                    elif ballVelX < 0 and ballVelY < 0:
+                        ballAngle = 225
+                    
+                    elif ballVelX > 0 and ballVelY > 0:
+                        ballAngle = 45
+                    
+                    elif ballVelX < 0 and ballVelY > 0:
+                        ballAngle = 135
+                    
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+                
+                else:
+                    ballVelY *= -1
+
+                points += 7
+                canBreakBricks = False
+                del redBricks[idx]
+                speedMode = "brick"
         
     # odbijanie od bat STATIC
-    if ball.colliderect(bat) or ball.colliderect(batShort):
+    if ball.colliderect(bat) and isBatShort == False:
         totalBallHits += 1
         canBreakBricks = True
+
+        if not redBricks and not orangeBricks and not dorangeBricks and not yellowBricks and not greenBricks and not blueBricks and firstScreenCleared == False:
+            newListOfBricks()
+            firstScreenCleared = True
 
         if checkOffset() > 0 and ballVelX < 0 and ballVelY > 0: # ball leci z prawej w dol, uderza bat od prawej strony
             if totalBallHits == 4:
@@ -342,7 +466,7 @@ while running:
                 ballVelX *= -1
                 ballVelY *= -1
 
-        
+    
         elif checkOffset() < 0 and ballVelX < 0 and ballVelY > 0: # ball leci z prawej w dol, udeza bat od lewej strony
             if totalBallHits == 4:
                 if speedMode == "bat": 
@@ -431,6 +555,162 @@ while running:
             else:
                 ballVelY *= -1
     
+    if ball.colliderect(batShort) and isBatShort == True:
+        totalBallHits += 1
+        canBreakBricks = True
+
+        if not redBricks and not orangeBricks and not dorangeBricks and not yellowBricks and not greenBricks and not blueBricks and firstScreenCleared == False:
+            newListOfBricks()
+            firstScreenCleared = True
+
+        if checkOffset() > 0 and ballVelX < 0 and ballVelY > 0: # ball leci z prawej w dol, uderza bat od prawej strony
+            if totalBallHits == 4:
+                if speedMode == "bat": 
+                    ballAngle = 60
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+            
+            elif totalBallHits == 8:
+                if speedMode == "bat": 
+                    ballSpeed = 6
+
+                    ballAngle = 30
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+                
+            elif totalBallHits == 12:
+                if speedMode == "bat": 
+                    ballSpeed = 7
+
+                    ballAngle = 38
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+
+            else:
+                ballVelX *= -1
+                ballVelY *= -1
+
+    
+        elif checkOffset() < 0 and ballVelX < 0 and ballVelY > 0: # ball leci z prawej w dol, udeza bat od lewej strony
+            if totalBallHits == 4:
+                if speedMode == "bat": 
+                    ballAngle = 120
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+            
+            elif totalBallHits == 8:
+                if speedMode == "bat": 
+                    ballSpeed = 6
+
+                    ballAngle = 150
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+                
+            elif totalBallHits == 12:
+                if speedMode == "bat": 
+                    ballSpeed = 7
+
+                    ballAngle = 142
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+
+            else:
+                ballVelY *= -1
+
+        elif checkOffset() < 0 and ballVelX > 0 and ballVelY > 0: # ball leci z lewej w dol, udeza bat od lewej strony
+            if totalBallHits == 4:
+                if speedMode == "bat": 
+                    ballAngle = 120
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+            
+            elif totalBallHits == 8:
+                if speedMode == "bat": 
+                    ballSpeed = 6
+
+                    ballAngle = 150
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+                
+            elif totalBallHits == 12:
+                if speedMode == "bat": 
+                    ballSpeed = 7
+
+                    ballAngle = 142
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+
+            else:
+                ballVelX *= -1
+                ballVelY *= -1
+
+        elif checkOffset() > 0 and ballVelX > 0 and ballVelY > 0: # ball leci z lewej w dol, udeza bat od prawej strony
+            if totalBallHits == 4:
+                if speedMode == "bat": 
+                    ballAngle = 60
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+            
+            elif totalBallHits == 8:
+                if speedMode == "bat": 
+                    ballSpeed = 6
+
+                    ballAngle = 30
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+                
+            elif totalBallHits == 12:
+                if speedMode == "bat": 
+                    ballSpeed = 7
+
+                    ballAngle = 38
+                    ballAngleRad = math.radians(ballAngle)
+                    ballVelX = math.cos(ballAngleRad) * ballSpeed
+                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+
+            else:
+                ballVelY *= -1
+
+    # ---TEKSTY STATYSTYK---
+    # punkty
+    pointsHundered = atari.render("{}".format(points // 100), True, [142, 142, 142])
+    pointsTen = atari.render("{}".format((points // 10) % 10), True, [142, 142, 142])
+    pointsOne = atari.render("{}".format(points % 10), True, [142, 142, 142])
+
+    screen.blit(pointsHundered, [500, 5])
+    screen.blit(pointsTen, [600, 5])
+    screen.blit(pointsOne, [700, 5])
+
+    # pilki
+    ballsLeftText = atari.render("{}".format(ballsLeft), True, [142, 142, 142])
+    
+    screen.blit(ballsLeftText, [1050, 5])
+
+    # rodzaj gry STALE
+    whichGameText = atari.render("1", True, [142, 142, 142])
+
+    screen.blit(whichGameText, [1350, 5])
+
+    # ---DEBUG---
+    text1 = freesansbold.render("SPEED: {}".format(ballSpeed), True, "white")
+    text2 = freesansbold.render("SMODE: {}".format(speedMode), True, "white")
+    text3 = freesansbold.render("INFLIVES: {}".format(infiniteLives), True, "white")
+
+    if showDebug == True:
+        screen.blit(text1, [0, 0])
+        screen.blit(text2, [0, 30])
+        screen.blit(text3, [0, 60])
 
     pygame.display.flip()
 
