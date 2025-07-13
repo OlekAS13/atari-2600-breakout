@@ -4,6 +4,8 @@ import random
 
 pygame.init()
 
+START_GAME = pygame.USEREVENT + 1
+
 screen = pygame.display.set_mode((1920, 1080), vsync = 1)
 clock = pygame.time.Clock()
 running = True
@@ -201,6 +203,8 @@ def checkOffset():
 
 newListOfBricks()
 
+pygame.time.set_timer(START_GAME, 50, loops = 1)
+
 while running:
     pressedKeys = pygame.key.get_pressed()
 
@@ -217,11 +221,11 @@ while running:
         if pressedKeys[pygame.K_LCTRL]:
             running = False
         
-        if event.type == pygame.MOUSEBUTTONDOWN:
-            if gameStarted == False and gameEnded == False: # start gry
-                startGame()
+        if event.type == START_GAME:
+            startGame()
 
-            elif gameStarted == True and isBallOut == True: # wyrzucenie pilki
+        if event.type == pygame.MOUSEBUTTONDOWN:
+            if gameStarted == True and isBallOut == True: # wyrzucenie pilki
                 throwBall()
 
     # ---RYSOWANIE EKRANU---
@@ -279,7 +283,30 @@ while running:
     if ball.colliderect(wallTop):
         ballVelY *= -1
         isBatShort = True
-    
+
+    # odbijanie od cegiel
+    if canBreakBricks == True:
+        for idx, blueBrick in enumerate(blueBricks):
+            if ball.colliderect(blueBrick):
+                ballVelY *= -1
+                points += 1
+                canBreakBricks = False
+                del blueBricks[idx]
+        
+        for idx, greenBrick in enumerate(greenBricks):
+            if ball.colliderect(greenBrick):
+                ballVelY *= -1
+                points += 1
+                canBreakBricks = False
+                del greenBricks[idx]
+
+        for idx, yellowBrick in enumerate(yellowBricks):
+            if ball.colliderect(yellowBrick):
+                ballVelY *= -1
+                points += 4
+                canBreakBricks = False
+                del yellowBricks[idx]
+        
     # odbijanie od bat STATIC
     if ball.colliderect(bat) or ball.colliderect(batShort):
         totalBallHits += 1
