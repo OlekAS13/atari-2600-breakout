@@ -33,6 +33,14 @@ atari = pygame.font.Font("atari.otf", 100) # czcionka atari
 freesansbold = pygame.font.Font("freesansbold.ttf", 30) # czcionka freesansbold
 
 # ---DZWIEKI---
+batSound = pygame.mixer.Sound("bat.mp3")
+wallSound = pygame.mixer.Sound("wall.mp3")
+blueSound = pygame.mixer.Sound("blue.mp3")
+greenSound = pygame.mixer.Sound("green.mp3")
+yellowSound = pygame.mixer.Sound("yellow.mp3")
+dorangeSound = pygame.mixer.Sound("dorange.mp3")
+orangeSound = pygame.mixer.Sound("orange.mp3")
+redSound = pygame.mixer.Sound("red.mp3")
 
 # elementy gry
 wallLeftImg = pygame.image.load("wallLeft.png").convert()
@@ -264,7 +272,26 @@ while running:
     
     # rysowanie pilki
     if isBallOut == False:
-        pygame.draw.rect(screen, [211, 85, 70], ball)
+        if ball.top <= 465 and ball.top > 440: # pilka niebieska
+            pygame.draw.rect(screen, [66, 73, 200], ball)
+        
+        elif ball.top <= 440 and ball.top > 415: # pilka zielona
+            pygame.draw.rect(screen, [73, 160, 73], ball)
+
+        elif ball.top <= 415 and ball.top > 390: # pilka zolta
+            pygame.draw.rect(screen, [162, 162, 42], ball)
+        
+        elif ball.top <= 390 and ball.top > 365: # pilka ciemnopomaranczowa
+            pygame.draw.rect(screen, [180, 122, 48], ball)
+        
+        elif ball.top <= 365 and ball.top > 340: # pilka pomaranczowa
+            pygame.draw.rect(screen, [198, 108, 58], ball)
+        
+        elif ball.top <= 340 and ball.top > 315: # pilka czerwona
+            pygame.draw.rect(screen, [211, 85, 70], ball)
+
+        else:
+            pygame.draw.rect(screen, [211, 85, 70], ball)
 
         ball = ball.move(ballVelX, ballVelY)
 
@@ -297,12 +324,18 @@ while running:
     # odbijanie od scian
     if ball.colliderect(wallLeft) or ball.colliderect(wallRight):
         ballVelX *= -1
+
+        wallSound.stop()
+        wallSound.play()
     
     # odbijanie od walltop
     if ball.colliderect(wallTop):
         ballVelY *= -1
         isBatShort = True
         canBreakBricks = True
+
+        batSound.stop()
+        batSound.play()
 
     # pilka wypada
     if ball.colliderect(ballOutCheck):
@@ -328,6 +361,9 @@ while running:
                 points += 1
                 canBreakBricks = False
                 del blueBricks[idx]
+
+                blueSound.stop()
+                blueSound.play()
         
         for idx, greenBrick in enumerate(greenBricks): # zielona
             if ball.colliderect(greenBrick):
@@ -335,6 +371,9 @@ while running:
                 points += 1
                 canBreakBricks = False
                 del greenBricks[idx]
+                
+                greenSound.stop()
+                greenSound.play()
 
         for idx, yellowBrick in enumerate(yellowBricks): # zolta
             if ball.colliderect(yellowBrick):
@@ -342,6 +381,9 @@ while running:
                 points += 4
                 canBreakBricks = False
                 del yellowBricks[idx]
+
+                yellowSound.stop()
+                yellowSound.play()
             
         for idx, dorangeBrick in enumerate(dorangeBricks): # ciemnopomaranczowa
             if ball.colliderect(dorangeBrick):
@@ -370,6 +412,9 @@ while running:
                 canBreakBricks = False
                 del dorangeBricks[idx]
                 speedMode = "brick"
+
+                dorangeSound.stop()
+                dorangeSound.play()
         
         for idx, orangeBrick in enumerate(orangeBricks): # pomaranczowa
             if ball.colliderect(orangeBrick):
@@ -398,6 +443,9 @@ while running:
                 canBreakBricks = False
                 del orangeBricks[idx]
                 speedMode = "brick"
+
+                orangeSound.stop()
+                orangeSound.play()
         
         for idx, redBrick in enumerate(redBricks): # czerwona
             if ball.colliderect(redBrick):
@@ -426,11 +474,17 @@ while running:
                 canBreakBricks = False
                 del redBricks[idx]
                 speedMode = "brick"
+
+                redSound.stop()
+                redSound.play()
         
     # odbijanie od bat STATIC
     if ball.colliderect(bat) and isBatShort == False:
         totalBallHits += 1
         canBreakBricks = True
+
+        batSound.stop()
+        batSound.play()
 
         if not redBricks and not orangeBricks and not dorangeBricks and not yellowBricks and not greenBricks and not blueBricks and firstScreenCleared == False:
             newListOfBricks()
@@ -558,6 +612,9 @@ while running:
     if ball.colliderect(batShort) and isBatShort == True:
         totalBallHits += 1
         canBreakBricks = True
+
+        batSound.stop()
+        batSound.play()
 
         if not redBricks and not orangeBricks and not dorangeBricks and not yellowBricks and not greenBricks and not blueBricks and firstScreenCleared == False:
             newListOfBricks()
