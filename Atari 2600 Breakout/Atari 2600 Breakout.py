@@ -186,6 +186,9 @@ def throwBall():
     speedMode = "bat"
     ballSpeed = 5
 
+    wallSound.stop()
+    wallSound.play()
+
     whichPosX = random.randint(0,2) # losowanie startowej pozycji X ball
 
     if whichPosX == 0:
@@ -355,6 +358,47 @@ while running:
 
     # odbijanie od cegiel
     if canBreakBricks == True:
+        allBrickRows = [
+            (blueBricks, 1, blueSound, False),
+            (greenBricks, 1, greenSound, False),
+            (yellowBricks, 4, yellowSound, False),
+            (dorangeBricks, 4, dorangeSound, True),
+            (orangeBricks, 7, orangeSound, True),
+            (redBricks, 7, redSound, True),
+        ]
+
+        for brickList, pointValue, sound, affectsSpeed in allBrickRows:
+            for idx, brick in enumerate(brickList):
+                if ball.colliderect(brick):
+                    if affectsSpeed and speedMode == "bat":
+                        ballSpeed = 8
+                        if ballVelX > 0 and ballVelY < 0:
+                            ballAngle = 315
+                        elif ballVelX < 0 and ballVelY < 0:
+                            ballAngle = 225
+                        elif ballVelX > 0 and ballVelY > 0:
+                            ballAngle = 45
+                        elif ballVelX < 0 and ballVelY > 0:
+                            ballAngle = 135
+
+                        ballAngleRad = math.radians(ballAngle)
+                        ballVelX = math.cos(ballAngleRad) * ballSpeed
+                        ballVelY = -math.sin(ballAngleRad) * ballSpeed
+                        speedMode = "brick"
+                    else:
+                        ballVelY *= -1
+
+                    points += pointValue
+                    canBreakBricks = False
+                    del brickList[idx]
+
+                    sound.stop()
+                    sound.play()
+                    break
+            if not canBreakBricks:
+                break
+
+    """if canBreakBricks == True:
         for idx, blueBrick in enumerate(blueBricks): # niebieska
             if ball.colliderect(blueBrick):
                 ballVelY *= -1
@@ -476,7 +520,7 @@ while running:
                 speedMode = "brick"
 
                 redSound.stop()
-                redSound.play()
+                redSound.play()"""
         
     # odbijanie od bat STATIC
     if ball.colliderect(bat) and isBatShort == False:
