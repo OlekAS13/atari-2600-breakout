@@ -16,10 +16,10 @@ pygame.display.toggle_fullscreen()
 
 gameStarted = False
 gameEnded = False
-drawBat = False
+drawPaddle = False
 isBallOut = True
 totalBallHits = 0
-isBatShort = False
+isPaddleShort = False
 infiniteLives = False
 firstScreenCleared = False
 showDebug = False
@@ -33,7 +33,7 @@ atari = pygame.font.Font("atari.otf", 100) # czcionka atari
 freesansbold = pygame.font.Font("freesansbold.ttf", 30) # czcionka freesansbold
 
 # ---DZWIEKI---
-batSound = pygame.mixer.Sound("bat.mp3")
+paddleSound = pygame.mixer.Sound("paddle.mp3")
 wallSound = pygame.mixer.Sound("wall.mp3")
 blueSound = pygame.mixer.Sound("blue.mp3")
 greenSound = pygame.mixer.Sound("green.mp3")
@@ -46,14 +46,14 @@ redSound = pygame.mixer.Sound("red.mp3")
 wallLeftImg = pygame.image.load("wallLeft.png").convert()
 wallRightImg = pygame.image.load("wallRight.png").convert()
 wallTop = pygame.Rect(310, 130, 1300, 60)
-bat = pygame.Rect(885, 1053, 150, 20)
+paddle = pygame.Rect(885, 1053, 150, 20)
 ball = pygame.Rect(951, 650, 20, 20)
-batShort = pygame.Rect(922, 1053, 80, 20)
+paddleShort = pygame.Rect(922, 1053, 80, 20)
 ballOutCheck = pygame.Rect(310, 1075, 1300, 30)
 
 # ---BALL---
 ballSpeed = 5
-speedMode = "bat"
+speedMode = "paddle"
 canBreakBricks = False
 
 # ---CEGLY---
@@ -174,16 +174,16 @@ def newListOfBricks():
     blueBricks = generateBlueBricks()
 
 def startGame():
-    global drawBat, gameStarted
+    global drawPaddle, gameStarted
     
     gameStarted = True
-    drawBat = True
+    drawPaddle = True
 
 def throwBall():
     global isBallOut, posX, ballAngleRad, ballVelX, ballVelY, ballSpeed, speedMode
     
     isBallOut = False
-    speedMode = "bat"
+    speedMode = "paddle"
     ballSpeed = 5
 
     wallSound.stop()
@@ -216,7 +216,7 @@ def throwBall():
     ballVelY = -math.sin(ballAngleRad) * ballSpeed
 
 def checkOffset():
-    offset = ball.centerx - bat.centerx
+    offset = ball.centerx - paddle.centerx
 
     return offset
 
@@ -229,8 +229,8 @@ while running:
 
     mousex, mousey = pygame.mouse.get_pos()
 
-    bat.centerx = mousex
-    batShort.centerx = mousex
+    paddle.centerx = mousex
+    paddleShort.centerx = mousex
 
     # obsluga eventow
     for event in pygame.event.get():
@@ -243,7 +243,7 @@ while running:
         if event.type == START_GAME:
             startGame()
 
-        if event.type == pygame.MOUSEBUTTONDOWN:
+        if event.type == pygame.MOUSEBUTTONDOWN or pressedKeys[pygame.K_g]:
             if gameStarted == True and isBallOut == True: # wyrzucenie pilki
                 throwBall()
         
@@ -267,11 +267,11 @@ while running:
     pygame.draw.rect(screen, "black", ballOutCheck)
 
     # rysowanie paletki
-    if drawBat == True and isBatShort == False:
-        pygame.draw.rect(screen, [211, 85, 70], bat)
+    if drawPaddle == True and isPaddleShort == False:
+        pygame.draw.rect(screen, [211, 85, 70], paddle)
     
-    elif drawBat == True and isBatShort == True:
-        pygame.draw.rect(screen, [211, 85, 70], batShort)
+    elif drawPaddle == True and isPaddleShort == True:
+        pygame.draw.rect(screen, [211, 85, 70], paddleShort)
     
     # rysowanie pilki
     if isBallOut == False:
@@ -334,16 +334,16 @@ while running:
     # odbijanie od walltop
     if ball.colliderect(wallTop):
         ballVelY *= -1
-        isBatShort = True
+        isPaddleShort = True
         canBreakBricks = True
 
-        batSound.stop()
-        batSound.play()
+        paddleSound.stop()
+        paddleSound.play()
 
     # pilka wypada
     if ball.colliderect(ballOutCheck):
         isBallOut = True
-        isBatShort = False
+        isPaddleShort = False
         totalBallHits = 0
 
         if infiniteLives == False:
@@ -370,7 +370,7 @@ while running:
         for brickList, pointValue, sound, affectsSpeed in allBrickRows:
             for idx, brick in enumerate(brickList):
                 if ball.colliderect(brick):
-                    if affectsSpeed and speedMode == "bat":
+                    if affectsSpeed and speedMode == "paddle":
                         ballSpeed = 8
                         if ballVelX > 0 and ballVelY < 0:
                             ballAngle = 315
@@ -522,13 +522,13 @@ while running:
                 redSound.stop()
                 redSound.play()"""
         
-    # odbijanie od bat STATIC
-    if ball.colliderect(bat) and isBatShort == False:
+    # odbijanie od paddle STATIC
+    if ball.colliderect(paddle) and isPaddleShort == False:
         totalBallHits += 1
         canBreakBricks = True
 
-        batSound.stop()
-        batSound.play()
+        paddleSound.stop()
+        paddleSound.play()
 
         if not redBricks and not orangeBricks and not dorangeBricks and not yellowBricks and not greenBricks and not blueBricks and firstScreenCleared == False:
             newListOfBricks()
@@ -536,14 +536,14 @@ while running:
 
         if checkOffset() > 0 and ballVelX < 0 and ballVelY > 0: # ball leci z prawej w dol, uderza bat od prawej strony
             if totalBallHits == 4:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballAngle = 60
                     ballAngleRad = math.radians(ballAngle)
                     ballVelX = math.cos(ballAngleRad) * ballSpeed
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
             
             elif totalBallHits == 8:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 6
 
                     ballAngle = 30
@@ -552,7 +552,7 @@ while running:
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
                 
             elif totalBallHits == 12:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 7
 
                     ballAngle = 38
@@ -567,14 +567,14 @@ while running:
     
         elif checkOffset() < 0 and ballVelX < 0 and ballVelY > 0: # ball leci z prawej w dol, udeza bat od lewej strony
             if totalBallHits == 4:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballAngle = 120
                     ballAngleRad = math.radians(ballAngle)
                     ballVelX = math.cos(ballAngleRad) * ballSpeed
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
             
             elif totalBallHits == 8:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 6
 
                     ballAngle = 150
@@ -583,7 +583,7 @@ while running:
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
                 
             elif totalBallHits == 12:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 7
 
                     ballAngle = 142
@@ -596,14 +596,14 @@ while running:
 
         elif checkOffset() < 0 and ballVelX > 0 and ballVelY > 0: # ball leci z lewej w dol, udeza bat od lewej strony
             if totalBallHits == 4:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballAngle = 120
                     ballAngleRad = math.radians(ballAngle)
                     ballVelX = math.cos(ballAngleRad) * ballSpeed
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
             
             elif totalBallHits == 8:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 6
 
                     ballAngle = 150
@@ -612,7 +612,7 @@ while running:
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
                 
             elif totalBallHits == 12:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 7
 
                     ballAngle = 142
@@ -626,14 +626,14 @@ while running:
 
         elif checkOffset() > 0 and ballVelX > 0 and ballVelY > 0: # ball leci z lewej w dol, udeza bat od prawej strony
             if totalBallHits == 4:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballAngle = 60
                     ballAngleRad = math.radians(ballAngle)
                     ballVelX = math.cos(ballAngleRad) * ballSpeed
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
             
             elif totalBallHits == 8:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 6
 
                     ballAngle = 30
@@ -642,7 +642,7 @@ while running:
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
                 
             elif totalBallHits == 12:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 7
 
                     ballAngle = 38
@@ -653,12 +653,12 @@ while running:
             else:
                 ballVelY *= -1
     
-    if ball.colliderect(batShort) and isBatShort == True:
+    if ball.colliderect(paddleShort) and isPaddleShort == True:
         totalBallHits += 1
         canBreakBricks = True
 
-        batSound.stop()
-        batSound.play()
+        paddleSound.stop()
+        paddleSound.play()
 
         if not redBricks and not orangeBricks and not dorangeBricks and not yellowBricks and not greenBricks and not blueBricks and firstScreenCleared == False:
             newListOfBricks()
@@ -666,14 +666,14 @@ while running:
 
         if checkOffset() > 0 and ballVelX < 0 and ballVelY > 0: # ball leci z prawej w dol, uderza bat od prawej strony
             if totalBallHits == 4:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballAngle = 60
                     ballAngleRad = math.radians(ballAngle)
                     ballVelX = math.cos(ballAngleRad) * ballSpeed
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
             
             elif totalBallHits == 8:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 6
 
                     ballAngle = 30
@@ -682,7 +682,7 @@ while running:
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
                 
             elif totalBallHits == 12:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 7
 
                     ballAngle = 38
@@ -697,14 +697,14 @@ while running:
     
         elif checkOffset() < 0 and ballVelX < 0 and ballVelY > 0: # ball leci z prawej w dol, udeza bat od lewej strony
             if totalBallHits == 4:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballAngle = 120
                     ballAngleRad = math.radians(ballAngle)
                     ballVelX = math.cos(ballAngleRad) * ballSpeed
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
             
             elif totalBallHits == 8:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 6
 
                     ballAngle = 150
@@ -713,7 +713,7 @@ while running:
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
                 
             elif totalBallHits == 12:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 7
 
                     ballAngle = 142
@@ -726,14 +726,14 @@ while running:
 
         elif checkOffset() < 0 and ballVelX > 0 and ballVelY > 0: # ball leci z lewej w dol, udeza bat od lewej strony
             if totalBallHits == 4:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballAngle = 120
                     ballAngleRad = math.radians(ballAngle)
                     ballVelX = math.cos(ballAngleRad) * ballSpeed
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
             
             elif totalBallHits == 8:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 6
 
                     ballAngle = 150
@@ -742,7 +742,7 @@ while running:
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
                 
             elif totalBallHits == 12:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 7
 
                     ballAngle = 142
@@ -756,14 +756,14 @@ while running:
 
         elif checkOffset() > 0 and ballVelX > 0 and ballVelY > 0: # ball leci z lewej w dol, udeza bat od prawej strony
             if totalBallHits == 4:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballAngle = 60
                     ballAngleRad = math.radians(ballAngle)
                     ballVelX = math.cos(ballAngleRad) * ballSpeed
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
             
             elif totalBallHits == 8:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 6
 
                     ballAngle = 30
@@ -772,7 +772,7 @@ while running:
                     ballVelY = -math.sin(ballAngleRad) * ballSpeed
                 
             elif totalBallHits == 12:
-                if speedMode == "bat": 
+                if speedMode == "paddle": 
                     ballSpeed = 7
 
                     ballAngle = 38
