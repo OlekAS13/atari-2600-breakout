@@ -220,6 +220,39 @@ def checkOffset():
 
     return offset
 
+def resetGame():
+    global gameStarted, gameEnded, drawPaddle, isBallOut, totalBallHits
+    global isPaddleShort, infiniteLives, firstScreenCleared, points, ballsLeft
+    global speedMode, ballSpeed, ball, ballVelX, ballVelY, ballAngle, ballAngleRad
+
+    gameStarted = False
+    gameEnded = False
+    drawPaddle = False
+    isBallOut = True
+    totalBallHits = 0
+    isPaddleShort = False
+    infiniteLives = False
+    firstScreenCleared = False
+    points = 0
+    ballsLeft = 5
+    speedMode = "paddle"
+    ballSpeed = 5
+
+    ball = pygame.Rect(951, 650, 20, 20)
+
+    whichAngle = random.randint(0, 1)
+    if whichAngle == 0:
+        ballAngle = 225
+    else:
+        ballAngle = 315
+
+    ballAngleRad = math.radians(ballAngle)
+    ballVelX = math.cos(ballAngleRad) * ballSpeed
+    ballVelY = -math.sin(ballAngleRad) * ballSpeed
+
+    newListOfBricks()
+
+
 newListOfBricks()
 
 pygame.time.set_timer(START_GAME, 50, loops = 1)
@@ -244,8 +277,12 @@ while running:
             startGame()
 
         if event.type == pygame.MOUSEBUTTONDOWN or pressedKeys[pygame.K_g]:
-            if gameStarted == True and isBallOut == True: # wyrzucenie pilki
+            if gameEnded:
+                resetGame()
+                startGame()
+            elif gameStarted == True and isBallOut == True:
                 throwBall()
+
         
         if pressedKeys[pygame.K_i] and isBallOut == True:
             infiniteLives = True
