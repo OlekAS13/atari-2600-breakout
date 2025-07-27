@@ -13,6 +13,7 @@ This game is a port of the original Breakout from 1976. In this game you need to
 * Mouse buttons - serve the ball
 * G - serve the ball
 * D - show / hide debug variables
+* R - restart game
 
 <br>
 <br>
