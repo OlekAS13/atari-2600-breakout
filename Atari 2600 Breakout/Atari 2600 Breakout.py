@@ -277,11 +277,13 @@ while running:
             startGame()
 
         if event.type == pygame.MOUSEBUTTONDOWN or pressedKeys[pygame.K_g]:
+            if gameStarted == True and isBallOut == True:
+                throwBall()
+        
+        if pressedKeys[pygame.K_r]:
             if gameEnded:
                 resetGame()
                 startGame()
-            elif gameStarted == True and isBallOut == True:
-                throwBall()
 
         
         if pressedKeys[pygame.K_i] and isBallOut == True:
