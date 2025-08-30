@@ -258,6 +258,7 @@ newListOfBricks()
 pygame.time.set_timer(START_GAME, 50, loops = 1)
 
 while running:
+    dt = clock.get_time() / 1000.0 # delta time w sekundach
     pressedKeys = pygame.key.get_pressed()
 
     mousex, mousey = pygame.mouse.get_pos()
@@ -335,7 +336,7 @@ while running:
         else:
             pygame.draw.rect(screen, [211, 85, 70], ball)
 
-        ball = ball.move(ballVelX, ballVelY)
+        ball = ball.move(ballVelX * dt * 200, ballVelY * dt * 200)
 
     # rysowanie red bricks
     for redBrick in redBricks:    
