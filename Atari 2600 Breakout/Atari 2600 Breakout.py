@@ -370,6 +370,13 @@ while running:
 
         wallSound.stop()
         wallSound.play()
+
+        # anti-clip
+        if ball.left < wallLeft.right:
+            ball.left = wallLeft.right
+        
+        if ball.right > wallRight.left:
+            ball.right = wallRight.left
     
     # odbijanie od walltop
     if ball.colliderect(wallTop):
@@ -379,6 +386,10 @@ while running:
 
         paddleSound.stop()
         paddleSound.play()
+
+        # anti-clip
+        if ball.top < wallTop.bottom:
+            ball.top = wallTop.bottom
 
     # pilka wypada
     if ball.colliderect(ballOutCheck):
