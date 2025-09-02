@@ -266,6 +266,12 @@ while running:
     paddle.centerx = mousex
     paddleShort.centerx = mousex
 
+    # ograniczenie do scian
+    paddle.left = max(paddle.left, 310)
+    paddle.right = min(paddle.right, 1610)
+    paddleShort.left = max(paddleShort.left, 310)
+    paddleShort.right = min(paddleShort.right, 1610)
+
     # obsluga eventow
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
@@ -449,129 +455,6 @@ while running:
             if not canBreakBricks:
                 break
 
-    """if canBreakBricks == True:
-        for idx, blueBrick in enumerate(blueBricks): # niebieska
-            if ball.colliderect(blueBrick):
-                ballVelY *= -1
-                points += 1
-                canBreakBricks = False
-                del blueBricks[idx]
-
-                blueSound.stop()
-                blueSound.play()
-        
-        for idx, greenBrick in enumerate(greenBricks): # zielona
-            if ball.colliderect(greenBrick):
-                ballVelY *= -1
-                points += 1
-                canBreakBricks = False
-                del greenBricks[idx]
-                
-                greenSound.stop()
-                greenSound.play()
-
-        for idx, yellowBrick in enumerate(yellowBricks): # zolta
-            if ball.colliderect(yellowBrick):
-                ballVelY *= -1
-                points += 4
-                canBreakBricks = False
-                del yellowBricks[idx]
-
-                yellowSound.stop()
-                yellowSound.play()
-            
-        for idx, dorangeBrick in enumerate(dorangeBricks): # ciemnopomaranczowa
-            if ball.colliderect(dorangeBrick):
-                if speedMode == "bat":
-                    ballSpeed = 8
-                    if ballVelX > 0 and ballVelY < 0:
-                        ballAngle = 315
-                    
-                    elif ballVelX < 0 and ballVelY < 0:
-                        ballAngle = 225
-                    
-                    elif ballVelX > 0 and ballVelY > 0:
-                        ballAngle = 45
-                    
-                    elif ballVelX < 0 and ballVelY > 0:
-                        ballAngle = 135
-                    
-                    ballAngleRad = math.radians(ballAngle)
-                    ballVelX = math.cos(ballAngleRad) * ballSpeed
-                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
-                
-                else:
-                    ballVelY *= -1
-
-                points += 4
-                canBreakBricks = False
-                del dorangeBricks[idx]
-                speedMode = "brick"
-
-                dorangeSound.stop()
-                dorangeSound.play()
-        
-        for idx, orangeBrick in enumerate(orangeBricks): # pomaranczowa
-            if ball.colliderect(orangeBrick):
-                if speedMode == "bat":
-                    ballSpeed = 8
-                    if ballVelX > 0 and ballVelY < 0:
-                        ballAngle = 315
-                    
-                    elif ballVelX < 0 and ballVelY < 0:
-                        ballAngle = 225
-                    
-                    elif ballVelX > 0 and ballVelY > 0:
-                        ballAngle = 45
-                    
-                    elif ballVelX < 0 and ballVelY > 0:
-                        ballAngle = 135
-                    
-                    ballAngleRad = math.radians(ballAngle)
-                    ballVelX = math.cos(ballAngleRad) * ballSpeed
-                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
-                
-                else:
-                    ballVelY *= -1
-
-                points += 7
-                canBreakBricks = False
-                del orangeBricks[idx]
-                speedMode = "brick"
-
-                orangeSound.stop()
-                orangeSound.play()
-        
-        for idx, redBrick in enumerate(redBricks): # czerwona
-            if ball.colliderect(redBrick):
-                if speedMode == "bat":
-                    ballSpeed = 8
-                    if ballVelX > 0 and ballVelY < 0:
-                        ballAngle = 315
-                    
-                    elif ballVelX < 0 and ballVelY < 0:
-                        ballAngle = 225
-                    
-                    elif ballVelX > 0 and ballVelY > 0:
-                        ballAngle = 45
-                    
-                    elif ballVelX < 0 and ballVelY > 0:
-                        ballAngle = 135
-                    
-                    ballAngleRad = math.radians(ballAngle)
-                    ballVelX = math.cos(ballAngleRad) * ballSpeed
-                    ballVelY = -math.sin(ballAngleRad) * ballSpeed
-                
-                else:
-                    ballVelY *= -1
-
-                points += 7
-                canBreakBricks = False
-                del redBricks[idx]
-                speedMode = "brick"
-
-                redSound.stop()
-                redSound.play()"""
         
     # odbijanie od paddle STATIC
     if ball.colliderect(paddle) and isPaddleShort == False:
