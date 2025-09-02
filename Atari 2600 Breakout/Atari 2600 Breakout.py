@@ -272,6 +272,18 @@ while running:
     paddleShort.left = max(paddleShort.left, 310)
     paddleShort.right = min(paddleShort.right, 1610)
 
+    # blokowanie myszy przy scianach
+    if isPaddleShort == False:
+        if paddle.left == 310 and mousex < paddle.centerx:
+            pygame.mouse.set_pos(paddle.centerx, mousey)
+        elif paddle.right == 1610 and mousex > paddle.centerx:
+            pygame.mouse.set_pos(paddle.centerx, mousey)
+    elif isPaddleShort == True:
+        if paddleShort.left == 310 and mousex < paddleShort.centerx:
+            pygame.mouse.set_pos(paddleShort.centerx, mousey)
+        elif paddleShort.right == 1610 and mousex > paddleShort.centerx:
+            pygame.mouse.set_pos(paddleShort.centerx, mousey)
+
     # obsluga eventow
     for event in pygame.event.get():
         if event.type == pygame.QUIT:
